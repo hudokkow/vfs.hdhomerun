@@ -142,27 +142,24 @@ static void Tokenize(const std::string& input, std::vector<std::string>& tokens,
   }
 }
 
-void* Open(const char* url, const char* hostname,
-           const char* filename, unsigned int port,
-           const char* options, const char* username,
-           const char* password)
+void* Open(VFSURL* url)
 {
   HDHContext* result = new HDHContext;
 
-  result->device = hdhomerun_device_create_from_str(hostname, NULL);
+  result->device = hdhomerun_device_create_from_str(url.hostname, NULL);
   if(!result->device)
   {
     delete result;
     return NULL;
   }
 
-  hdhomerun_device_set_tuner_from_str(result->device, filename);
+  hdhomerun_device_set_tuner_from_str(result->device, url.filename);
 
   std::vector<std::string> opts;
   if (*options == '?')
     options++;
   
-  Tokenize(options, opts, "&");
+  Tokenize(url.options, opts, "&");
   for (size_t i=0;i<opts.size();++i)
   {
     size_t pos;
@@ -209,23 +206,17 @@ int64_t Seek(void* context, int64_t iFilePosition, int iWhence)
   return -1;
 }
 
-bool Exists(const char* url, const char* hostname,
-            const char* filename, unsigned int port,
-            const char* options, const char* username,
-            const char* password)
+bool Exists(VFSURL* url)
 {
   /*
    *    * HDHomeRun URLs are of the form hdhomerun://1014F6D1/tuner0?channel=qam:108&program=10
    *    * The filename starts with "tuner" and has no extension. This check will cover off requests
    *    * for *.tbn, *.jpg, *.jpeg, *.edl etc. that do not exist.
    **/
-  return strncmp(filename, "tuner", 6) == 0 && !strstr(filename,".");
+  return strncmp(url.filename, "tuner", 6) == 0 && !strstr(url.filename,".");
 }
 
-int Stat(const char* url, const char* hostname,
-         const char* filename2, unsigned int port,
-         const char* options, const char* username,
-         const char* password, struct __stat64* buffer)
+int Stat(VFSURL* url, struct __stat64* buffer)
 {
   memset(buffer, 0, sizeof(struct __stat64));
   return 0;
@@ -244,21 +235,14 @@ void DisconnectAll()
 {
 }
 
-bool DirectoryExists(const char* url, const char* hostname,
-                     const char* filename, unsigned int port,
-                     const char* options, const char* username,
-                     const char* password)
+bool DirectoryExists(VFSURL* url)
 {
   return false;
 }
 
-void* GetDirectory(const char* url, const char* hostname,
-                   const char* filename, unsigned int port,
-                   const char* options, const char* username,
-                   const char* password, VFSDirEntry** items,
-                   int* num_items)
+void* GetDirectory(VFSURL* url)
 {
-  if(strlen(hostname) == 0)
+  if(strlen(url.hostname) == 0)
   {
     // no hostname, list all available devices
     int target_ip = 0;
@@ -298,11 +282,11 @@ void* GetDirectory(const char* url, const char* hostname,
   }
   else
   {
-    hdhomerun_device_t* device = hdhomerun_device_create_from_str(hostname, NULL);
+    hdhomerun_device_t* device = hdhomerun_device_create_from_str(url.hostname, NULL);
     if(!device)
       return NULL;
 
-    hdhomerun_device_set_tuner_from_str(device, filename);
+    hdhomerun_device_set_tuner_from_str(device, url.filename);
 
     hdhomerun_tuner_status_t status;
     if(!hdhomerun_device_get_tuner_status(device, NULL, &status))
@@ -320,7 +304,7 @@ void* GetDirectory(const char* url, const char* hostname,
       sprintf(&label[0], "Current Stream: Channel %s, SNR %d", status.channel, status.signal_to_noise_quality);
     }
 
-    std::string path = std::string("hdhomerun://") + hostname + "/" + filename;
+    std::string path = std::string("hdhomerun://") + url.hostname + "/" + url.filename;
     if (path[path.size()-1] == '/')
       path.erase(path.end()-1);
     std::vector<VFSDirEntry>* result = new std::vector<VFSDirEntry>(1);
@@ -358,18 +342,12 @@ void FreeDirectory(void* items)
   delete &ctx;
 }
 
-bool CreateDirectory(const char* url, const char* hostname,
-                     const char* filename, unsigned int port,
-                     const char* options, const char* username,
-                     const char* password)
+bool CreateDirectory(VFSURL* url)
 {
   return false;
 }
 
-bool RemoveDirectory(const char* url, const char* hostname,
-                     const char* filename, unsigned int port,
-                     const char* options, const char* username,
-                     const char* password)
+bool RemoveDirectory(VFSURL* url)
 {
   return false;
 }
@@ -416,39 +394,22 @@ int Write(void* context, const void* lpBuf, int64_t uiBufSize)
   return -1;
 }
 
-bool Delete(const char* url, const char* hostname,
-            const char* filename2, unsigned int port,
-            const char* options, const char* username,
-            const char* password)
+bool Delete(VFSURL* url)
 {
   return false;
 }
 
-bool Rename(const char* url, const char* hostname,
-            const char* filename, unsigned int port,
-            const char* options, const char* username,
-            const char* password,
-            const char* url2, const char* hostname2,
-            const char* filename2, unsigned int port2,
-            const char* options2, const char* username2,
-            const char* password2)
+bool Rename(VFSURL* url, VFSURL* url2)
 {
   return false;
 }
 
-void* OpenForWrite(const char* url, const char* hostname,
-                   const char* filename2, unsigned int port,
-                   const char* options, const char* username,
-                   const char* password, bool bOverWrite)
+void* OpenForWrite(VFSURL* url, bool bOverWrite)
 {
   return NULL;
 }
 
-void* ContainsFiles(const char* url, const char* hostname,
-                    const char* filename2, unsigned int port,
-                    const char* options, const char* username,
-                    const char* password,
-                    VFSDirEntry** items, int* num_items)
+void* ContainsFiles(VFSURL* url, VFSDirEntry** items, int* num_items)
 {
   return NULL;
 }
