@@ -156,7 +156,7 @@ void* Open(VFSURL* url)
   hdhomerun_device_set_tuner_from_str(result->device, url->filename);
 
   std::vector<std::string> opts;
-  if (*options == '?')
+  if (*url->options == '?')
     options++;
   
   Tokenize(url->options, opts, "&");
@@ -240,7 +240,7 @@ bool DirectoryExists(VFSURL* url)
   return false;
 }
 
-void* GetDirectory(VFSURL* url)
+void* GetDirectory(VFSURL* url, VFSDirEntry** items, int* num_items)
 {
   if(strlen(url->hostname) == 0)
   {
