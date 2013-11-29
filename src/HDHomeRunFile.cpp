@@ -157,7 +157,7 @@ void* Open(VFSURL* url)
 
   std::vector<std::string> opts;
   if (*url->options == '?')
-    options++;
+    url->options++;
   
   Tokenize(url->options, opts, "&");
   for (size_t i=0;i<opts.size();++i)
