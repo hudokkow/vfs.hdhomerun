@@ -146,20 +146,20 @@ void* Open(VFSURL* url)
 {
   HDHContext* result = new HDHContext;
 
-  result->device = hdhomerun_device_create_from_str(url.hostname, NULL);
+  result->device = hdhomerun_device_create_from_str(url->hostname, NULL);
   if(!result->device)
   {
     delete result;
     return NULL;
   }
 
-  hdhomerun_device_set_tuner_from_str(result->device, url.filename);
+  hdhomerun_device_set_tuner_from_str(result->device, url->filename);
 
   std::vector<std::string> opts;
   if (*options == '?')
     options++;
   
-  Tokenize(url.options, opts, "&");
+  Tokenize(url->options, opts, "&");
   for (size_t i=0;i<opts.size();++i)
   {
     size_t pos;
@@ -213,7 +213,7 @@ bool Exists(VFSURL* url)
    *    * The filename starts with "tuner" and has no extension. This check will cover off requests
    *    * for *.tbn, *.jpg, *.jpeg, *.edl etc. that do not exist.
    **/
-  return strncmp(url.filename, "tuner", 6) == 0 && !strstr(url.filename,".");
+  return strncmp(url->filename, "tuner", 6) == 0 && !strstr(url->filename,".");
 }
 
 int Stat(VFSURL* url, struct __stat64* buffer)
@@ -242,7 +242,7 @@ bool DirectoryExists(VFSURL* url)
 
 void* GetDirectory(VFSURL* url)
 {
-  if(strlen(url.hostname) == 0)
+  if(strlen(url->hostname) == 0)
   {
     // no hostname, list all available devices
     int target_ip = 0;
@@ -282,11 +282,11 @@ void* GetDirectory(VFSURL* url)
   }
   else
   {
-    hdhomerun_device_t* device = hdhomerun_device_create_from_str(url.hostname, NULL);
+    hdhomerun_device_t* device = hdhomerun_device_create_from_str(url->hostname, NULL);
     if(!device)
       return NULL;
 
-    hdhomerun_device_set_tuner_from_str(device, url.filename);
+    hdhomerun_device_set_tuner_from_str(device, url->filename);
 
     hdhomerun_tuner_status_t status;
     if(!hdhomerun_device_get_tuner_status(device, NULL, &status))
@@ -304,7 +304,7 @@ void* GetDirectory(VFSURL* url)
       sprintf(&label[0], "Current Stream: Channel %s, SNR %d", status.channel, status.signal_to_noise_quality);
     }
 
-    std::string path = std::string("hdhomerun://") + url.hostname + "/" + url.filename;
+    std::string path = std::string("hdhomerun://") + url->hostname + "/" + url->filename;
     if (path[path.size()-1] == '/')
       path.erase(path.end()-1);
     std::vector<VFSDirEntry>* result = new std::vector<VFSDirEntry>(1);
