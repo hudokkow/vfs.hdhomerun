@@ -240,7 +240,8 @@ bool DirectoryExists(VFSURL* url)
   return false;
 }
 
-void* GetDirectory(VFSURL* url, VFSDirEntry** items, int* num_items)
+void* GetDirectory(VFSURL* url, VFSDirEntry** items,
+                   int* num_items, VFSCallbacks* callbacks)
 {
   if(strlen(url->hostname) == 0)
   {
