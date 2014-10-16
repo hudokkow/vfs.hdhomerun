@@ -358,7 +358,7 @@ int Truncate(void* context, int64_t size)
   return -1;
 }
 
-unsigned int Read(void* context, void* lpBuf, int64_t uiBufSize)
+ssize_t Read(void* context, void* lpBuf, size_t uiBufSize)
 {
   HDHContext* ctx = (HDHContext*)context;
 
@@ -374,12 +374,12 @@ unsigned int Read(void* context, void* lpBuf, int64_t uiBufSize)
   PLATFORM::CTimeout timestamp(5000);
   while(1)
   {
-    datasize = (size_t) uiBufSize;
+    datasize = uiBufSize;
     uint8_t* ptr = hdhomerun_device_stream_recv(ctx->device, datasize, &datasize);
     if(ptr)
     {
       memcpy(lpBuf, ptr, datasize);
-      return (unsigned int)datasize;
+      return datasize;
     }
 
     if(timestamp.TimeLeft() == 0)
@@ -387,10 +387,10 @@ unsigned int Read(void* context, void* lpBuf, int64_t uiBufSize)
 
     PLATFORM::CEvent::Sleep(64);
   }
-  return (unsigned int)datasize;
+  return datasize;
 }
 
-int Write(void* context, const void* lpBuf, int64_t uiBufSize)
+ssize_t Write(void* context, const void* lpBuf, size_t uiBufSize)
 {
   return -1;
 }
