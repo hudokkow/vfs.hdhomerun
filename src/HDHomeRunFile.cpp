@@ -18,8 +18,8 @@
  *
  */
 
-#include "xbmc/libXBMC_addon.h"
-#include "xbmc/threads/mutex.h"
+#include "kodi/libXBMC_addon.h"
+#include "kodi/threads/mutex.h"
 #include <sstream>
 #include <string>
 
@@ -28,8 +28,8 @@ ADDON::CHelper_libXBMC_addon *XBMC           = NULL;
 extern "C" {
 
 #include "hdhomerun.h"
-#include "xbmc/xbmc_vfs_dll.h"
-#include "xbmc/IFileTypes.h"
+#include "kodi/kodi_vfs_dll.h"
+#include "kodi/IFileTypes.h"
 
 //-- Create -------------------------------------------------------------------
 // Called on load. Addon should fully initalize or return error status
